@@ -1,0 +1,22 @@
+[
+  {
+    "question": "What is Abhishek's current professional role and his specific technical stack?",
+    "ground_truth": "Abhishek is a frontend developer with 15 years of experience. He works at Coforge and is an expert in JavaScript, React, and Vue.js. His core skills also include HTML, CSS, Node.js, and version control."
+  },
+  {
+    "question": "Where is Giyas located and what is his professional background?",
+    "ground_truth": "Giyas lives in Delhi and works at Coforge. He has a total of 20 years of experience."
+  },
+  {
+    "question": "What is IntelliFrame Media (IFM) and how is it managed?",
+    "ground_truth": "IFM is Abhishek's personal music and content project focused on music production and content creation. He reviews IFM work every Sunday from 11:00 AM to 12:30 PM."
+  },
+  {
+    "question": "What does RAG stand for and what are its three main steps?",
+    "ground_truth": "RAG stands for Retrieval Augmented Generation. The three main steps are Retrieve, Augment, and Generate."
+  },
+  {
+    "question": "What is the role of an embedding model and name some popular vector databases?",
+    "ground_truth": "An embedding model converts text into numerical representations called vectors. Popular vector databases include ChromaDB, Pinecone, and FAISS."
+  }
+]

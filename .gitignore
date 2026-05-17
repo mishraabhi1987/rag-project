@@ -1,0 +1,21 @@
+# ── Python ──
+__pycache__/
+
+# ── Virtual Environment ──
+rag_env/
+
+# ── Environment & Secrets ──
+.env
+
+# ── Logs ──
+*.log
+
+# ── Vector DB (regenerable) ──
+chroma_db/
+
+# ── OS specific ──
+.DS_Store
+
+# ── IDE ──
+.vscode/
+.idea/

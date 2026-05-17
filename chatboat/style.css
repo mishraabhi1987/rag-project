@@ -1,0 +1,424 @@
+/* ════════════════════════════════════════════
+   RAG Chatbot — style.css
+   Dark theme, minimal, techy feel
+   Font: Geist Mono (headings) + Instrument Sans (body)
+════════════════════════════════════════════ */
+
+
+/* ── CSS VARIABLES ──────────────────────────
+   Ek jagah pe color/size change karo,
+   poori site pe reflect hoga
+───────────────────────────────────────────── */
+:root {
+  --bg-page:        #0d0d0f;   /* Page background — near black */
+  --bg-container:   #141416;   /* Chat container background */
+  --bg-header:      #1a1a1e;   /* Header background */
+  --bg-input:       #1e1e23;   /* Input box background */
+  --bg-user-msg:    #1f3a4a;   /* User message bubble (dark teal) */
+  --bg-bot-msg:     #1c1c21;   /* Bot message bubble (dark gray) */
+
+  --accent:         #4ecca3;   /* Green accent — brand color */
+  --accent-dim:     #2a7a61;   /* Dimmer green for borders */
+
+  --text-primary:   #e8e8ec;   /* Main text color */
+  --text-secondary: #6b6b7a;   /* Muted text (time, hints) */
+  --text-user:      #a8d8ea;   /* User message text (light blue) */
+
+  --border:         #2a2a32;   /* Subtle border color */
+  --border-focus:   #4ecca3;   /* Border when input is focused */
+
+  --radius-msg:     14px;      /* Message bubble corner radius */
+  --radius-btn:     10px;      /* Button corner radius */
+
+  --font-mono:      'Geist Mono', monospace;      /* Headers, badges */
+  --font-body:      'Instrument Sans', sans-serif; /* Messages, input */
+
+  --transition:     0.2s ease; /* Default transition speed */
+}
+
+
+/* ── RESET ───────────────────────────────────
+   Browser ka default style hatao
+───────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+/* ── BASE BODY ───────────────────────────────
+   Poora page ka base style
+───────────────────────────────────────────── */
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  height: 100vh;            /* Full viewport height */
+  display: flex;
+  align-items: center;      /* Vertically center */
+  justify-content: center;  /* Horizontally center */
+  padding: 16px;
+}
+
+
+/* ══════════════════════════════════════════
+   CHAT CONTAINER
+   Main chat window — flex column layout
+   (header on top, messages in middle, input at bottom)
+══════════════════════════════════════════ */
+.chat-container {
+  width: 100%;
+  max-width: 760px;          /* Desktop pe max width */
+  height: calc(100vh - 32px); /* Full height minus body padding */
+  max-height: 900px;
+  background-color: var(--bg-container);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;    /* Vertical stack */
+  overflow: hidden;          /* Children ka overflow cut karo */
+}
+
+
+/* ══════════════════════════════════════════
+   HEADER
+   Top bar with title and status
+══════════════════════════════════════════ */
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background-color: var(--bg-header);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;            /* Header ka size fix rahega, shrink nahi hoga */
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Animated green dot (pulsing = online) */
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: var(--accent);
+  box-shadow: 0 0 0 0 var(--accent);
+  animation: pulse 2s infinite; /* Pulse animation */
+  flex-shrink: 0;
+}
+
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(78, 204, 163, 0.5); }
+  70%  { box-shadow: 0 0 0 8px rgba(78, 204, 163, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(78, 204, 163, 0); }
+}
+
+.chat-title {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--text-primary);
+}
+
+.chat-subtitle {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  font-family: var(--font-mono);
+}
+
+/* Model name badge (top right) */
+.model-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--accent);
+  background: rgba(78, 204, 163, 0.08);
+  border: 1px solid var(--accent-dim);
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+}
+
+
+/* ══════════════════════════════════════════
+   MESSAGES AREA
+   Scrollable chat history
+══════════════════════════════════════════ */
+.chat-messages {
+  flex: 1;                   /* Available space le lo (grow) */
+  overflow-y: auto;          /* Vertical scroll jab messages zyada ho */
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;                 /* Messages ke beech gap */
+  scroll-behavior: smooth;   /* Smooth scroll when new message arrives */
+}
+
+/* Custom scrollbar (Chrome/Edge) */
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+
+/* ══════════════════════════════════════════
+   MESSAGE BUBBLE
+   Har ek message ka structure
+══════════════════════════════════════════ */
+.message {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  animation: fadeSlideIn 0.25s ease forwards; /* Appear animation */
+  max-width: 85%;            /* Message poori width nahi lega */
+}
+
+/* Bot message — left side */
+.message.bot {
+  align-self: flex-start;    /* Left pe rakho */
+  flex-direction: row;       /* Avatar, phir message */
+}
+
+/* User message — right side */
+.message.user {
+  align-self: flex-end;      /* Right pe rakho */
+  flex-direction: row-reverse; /* Message, phir avatar */
+}
+
+/* Message appear animation */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* ── AVATAR ──────────────────────────────────
+   Small circular icon next to each message
+───────────────────────────────────────────── */
+.message-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--bg-header);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  flex-shrink: 0;            /* Avatar ka size fixed rahega */
+}
+
+/* User avatar slightly different color */
+.message.user .message-avatar {
+  color: var(--text-user);
+  border-color: rgba(168, 216, 234, 0.2);
+}
+
+
+/* ── MESSAGE CONTENT ─────────────────────────
+   Text bubble itself
+───────────────────────────────────────────── */
+.message-content {
+  padding: 12px 16px;
+  border-radius: var(--radius-msg);
+  line-height: 1.65;
+  font-size: 14px;
+}
+
+/* Bot message bubble */
+.message.bot .message-content {
+  background-color: var(--bg-bot-msg);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-top-left-radius: 4px; /* Sharp top-left corner (connects to avatar) */
+}
+
+/* User message bubble */
+.message.user .message-content {
+  background-color: var(--bg-user-msg);
+  border: 1px solid rgba(168, 216, 234, 0.15);
+  color: var(--text-user);
+  border-top-right-radius: 4px; /* Sharp top-right corner */
+  text-align: left;
+}
+
+/* Time stamp below message */
+.message-time {
+  display: block;
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  font-family: var(--font-mono);
+}
+
+
+/* ══════════════════════════════════════════
+   TYPING INDICATOR
+   Animated dots jab bot soch raha ho
+══════════════════════════════════════════ */
+.typing-indicator {
+  display: none;             /* Default hidden — JS se show/hide hoga */
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px 12px;
+}
+
+.typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 16px;
+  background: var(--bg-bot-msg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-msg);
+  border-top-left-radius: 4px;
+}
+
+/* Teenon dots */
+.typing-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.4;
+  animation: blink 1.2s infinite ease-in-out;
+}
+
+/* Har dot ki delay alag hai — wave effect */
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes blink {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50%       { opacity: 1;   transform: scale(1.1); }
+}
+
+
+/* ══════════════════════════════════════════
+   INPUT AREA
+   Bottom bar with textarea + send button
+══════════════════════════════════════════ */
+.chat-input-area {
+  padding: 12px 20px 20px;
+  background: var(--bg-container);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* Hint text above input */
+.input-toolbar {
+  margin-bottom: 8px;
+}
+
+.toolbar-hint {
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  letter-spacing: 0.2px;
+}
+
+/* Input row: textarea + button side by side */
+.input-row {
+  display: flex;
+  align-items: flex-end;     /* Button bottom pe alag */
+  gap: 10px;
+}
+
+/* ── TEXTAREA ─────────────────────────────── */
+.chat-input {
+  flex: 1;                   /* Available width le lo */
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  resize: none;              /* Manual resize disable */
+  outline: none;
+  max-height: 140px;         /* Zyada bada nahi hoga */
+  overflow-y: auto;
+  transition: border-color var(--transition);
+}
+
+/* Focus state — accent border */
+.chat-input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(78, 204, 163, 0.08);
+}
+
+.chat-input::placeholder {
+  color: var(--text-secondary);
+}
+
+/* ── SEND BUTTON ─────────────────────────── */
+.send-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-btn);
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0d0d0f;            /* Dark icon on green button */
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.send-btn:hover:not(:disabled) {
+  background: #5dd9b4;       /* Slightly lighter on hover */
+  transform: scale(1.05);    /* Slight zoom */
+}
+
+.send-btn:active:not(:disabled) {
+  transform: scale(0.97);    /* Press effect */
+}
+
+/* Disabled state — jab message process ho raha ho */
+.send-btn:disabled {
+  background: var(--border);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+  transform: none;
+}
+
+
+/* ══════════════════════════════════════════
+   RESPONSIVE — Mobile ke liye
+══════════════════════════════════════════ */
+@media (max-width: 600px) {
+  body { padding: 0; }
+
+  .chat-container {
+    height: 100vh;
+    border-radius: 0;
+    border: none;
+    max-height: none;
+  }
+
+  .chat-header { padding: 14px 16px; }
+  .chat-messages { padding: 16px 12px; }
+  .chat-input-area { padding: 10px 12px 16px; }
+
+  .message { max-width: 92%; }
+}

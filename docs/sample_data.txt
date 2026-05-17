@@ -1,0 +1,8 @@
+Abhishek is a frontend developer with 15 years of experience.
+He works at Coforge and is expert in JavaScript, React and Vue.js.
+His core skills include HTML, CSS, Node.js and version control.
+
+Abhishek manages IFM which stands for IntelliFrame Media.
+IFM is his personal music and content project.
+He reviews IFM work every Sunday from 11am to 12:30pm.
+IFM focuses on music production and content creation.

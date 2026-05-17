@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!--
+    charset=UTF-8  → Hindi/special characters sahi dikhein
+    viewport       → Mobile pe bhi sahi scale ho
+  -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RAG Chatbot</title>
+
+    <!-- Humara apna CSS file link kar rahe hain -->
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Google Font: Geist Mono — clean, techy feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <!--
+    ═══════════════════════════════════════
+    MAIN CONTAINER
+    Poori chat window iske andar hai
+    ═══════════════════════════════════════
+  -->
+    <div class="chat-container">
+      <!-- ── HEADER ─────────────────────────────
+         Top bar — title aur status dikhata hai
+    ──────────────────────────────────────── -->
+      <header class="chat-header">
+        <div class="header-left">
+          <!-- Green dot = online/active status -->
+          <span class="status-dot"></span>
+          <div>
+            <h1 class="chat-title">RAG Assistant</h1>
+            <p class="chat-subtitle">
+              Created by Abhishek and Powered by ChromaDB + Claude
+            </p>
+          </div>
+        </div>
+        <!-- Right side mein model name badge -->
+        <span class="model-badge">claude-haiku-4-5</span>
+      </header>
+
+      <!-- ── MESSAGES AREA ──────────────────────
+         Yahan saari chat messages dikhti hain
+         overflow-y: auto = scroll hoga jab messages zyada ho
+    ──────────────────────────────────────── -->
+      <main class="chat-messages" id="chatMessages">
+        <!-- 
+        Yeh ek default "welcome" message hai
+        class="message bot" = left side dikhega (bot ka message)
+        class="message user" = right side dikhega (user ka message)
+      -->
+        <div class="message bot">
+          <div class="message-avatar">AI</div>
+          <div class="message-content">
+            <p>
+              Hello! I'm your RAG Assistant. Ask me anything about your
+              documents — I'll search through the knowledge base and give you
+              accurate, sourced answers.
+            </p>
+            <span class="message-time" id="welcomeTime"></span>
+          </div>
+        </div>
+      </main>
+
+      <!-- ── TYPING INDICATOR ───────────────────
+         Jab bot response generate kar raha ho
+         tab yeh animated dots dikhte hain
+         Default: hidden (display: none CSS mein)
+    ──────────────────────────────────────── -->
+      <div class="typing-indicator" id="typingIndicator">
+        <div class="message-avatar">AI</div>
+        <div class="typing-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+
+      <!-- ── INPUT AREA ─────────────────────────
+         Bottom bar — yahan user type karta hai
+    ──────────────────────────────────────── -->
+      <footer class="chat-input-area">
+        <!-- Sources toggle — optional feature, baad mein use karenge -->
+        <div class="input-toolbar">
+          <span class="toolbar-hint"
+            >Enter to send &nbsp;·&nbsp; Shift+Enter for new line</span
+          >
+        </div>
+
+        <div class="input-row">
+          <!--
+          textarea = multi-line input
+          id="userInput" = JS se refer karenge
+          rows="1" = start mein ek line, auto-grow hoga JS se
+          placeholder = jab kuch nahi likha ho tab dikh
+        -->
+          <textarea
+            id="userInput"
+            class="chat-input"
+            placeholder="Ask a question about your documents..."
+            rows="1"
+          ></textarea>
+
+          <!--
+          Send button
+          onclick="sendMessage()" = JS function call
+        -->
+          <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+            <!-- SVG arrow icon (send arrow) -->
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+      </footer>
+    </div>
+    <!-- end .chat-container -->
+
+    <!-- ════════════════════════════════════════
+       JAVASCRIPT — Chatbot ka brain
+       HTML load hone ke baad run hota hai
+  ════════════════════════════════════════ -->
+    <script>
+      // ── CONFIG ──────────────────────────────
+      // Yahan sirf ek jagah pe API URL change karo
+      // Backend ready hone ke baad yahi URL update karenge
+      const API_URL = "http://localhost:8000/chat";
+
+      // Kaun sa Claude model use karna hai
+      const MODEL = "claude-haiku-4-5";
+
+      // ── WELCOME TIME ─────────────────────────
+      // Page load hote hi current time set karo welcome message mein
+      document.getElementById("welcomeTime").textContent = getCurrentTime();
+
+      // ── AUTO-RESIZE TEXTAREA ─────────────────
+      // Jab user zyada text likhe, input box bada ho jaaye
+      const userInput = document.getElementById("userInput");
+      userInput.addEventListener("input", function () {
+        this.style.height = "auto"; // Reset
+        this.style.height = this.scrollHeight + "px"; // Content ke hisaab se grow
+      });
+
+      // ── ENTER KEY HANDLING ───────────────────
+      // Enter = send, Shift+Enter = new line
+      userInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault(); // Default newline rokna
+          sendMessage(); // Message bhejo
+        }
+      });
+
+      // ── MAIN FUNCTION: sendMessage() ─────────
+      // Yeh function tab chalti hai jab user send kare
+      async function sendMessage() {
+        // 1. User ka text lo, extra spaces hatao
+        const question = userInput.value.trim();
+
+        // 2. Agar kuch likha hi nahi, toh kuch mat karo
+        if (!question) return;
+
+        // 3. Input clear karo aur resize reset karo
+        userInput.value = "";
+        userInput.style.height = "auto";
+
+        // 4. Send button disable karo (double-send rokne ke liye)
+        setSendBtnState(false);
+
+        // 5. User ka message screen pe dikhao
+        appendMessage("user", question);
+
+        // 6. Bot typing indicator show karo
+        showTyping(true);
+
+        // 7. Backend API call karo
+        try {
+          const response = await fetch(API_URL, {
+            method: "POST", // POST request
+            headers: { "Content-Type": "application/json" }, // JSON bhej rahe hain
+            body: JSON.stringify({ question: question }), // User ka sawaal
+          });
+
+          // 8. Response JSON mein convert karo
+          const data = await response.json();
+
+          // 9. Typing indicator hatao
+          showTyping(false);
+
+          // 10. Bot ka answer dikhao
+          // Backend se 'answer' field expect kar rahe hain
+          appendMessage("bot", data.answer || "No response Found.");
+        } catch (error) {
+          // Agar backend se connect nahi hua
+          showTyping(false);
+          appendMessage(
+            "bot",
+            "⚠️ Unable to connect to the backend. Please make sure the Python server is running.",
+          );
+          console.error("API Error:", error);
+        }
+
+        // 11. Send button wapas enable karo
+        setSendBtnState(true);
+
+        // 12. Input pe focus wapas do
+        userInput.focus();
+      }
+
+      // ── HELPER: appendMessage() ──────────────
+      // Ek naya message bubble banao aur chat mein add karo
+      function appendMessage(role, text) {
+        const messagesDiv = document.getElementById("chatMessages");
+
+        // Naya div banao
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("message", role); // 'message user' ya 'message bot'
+
+        // Avatar text: user ke liye "U", bot ke liye "AI"
+        const avatar = role === "user" ? "U" : "AI";
+
+        // Message HTML structure
+        messageDiv.innerHTML = `
+        <div class="message-avatar">${avatar}</div>
+        <div class="message-content">
+          <p>${escapeHtml(text)}</p>
+          <span class="message-time">${getCurrentTime()}</span>
+        </div>
+      `;
+
+        // Chat mein add karo
+        messagesDiv.appendChild(messageDiv);
+
+        // Neeche scroll karo taaki latest message dikhe
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      }
+
+      // ── HELPER: showTyping() ─────────────────
+      // Typing indicator dikhao ya chhupaao
+      function showTyping(show) {
+        const indicator = document.getElementById("typingIndicator");
+        indicator.style.display = show ? "flex" : "none";
+
+        // Agar show ho raha hai toh scroll down
+        if (show) {
+          const messagesDiv = document.getElementById("chatMessages");
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+      }
+
+      // ── HELPER: setSendBtnState() ─────────────
+      // Send button enable/disable karo
+      function setSendBtnState(enabled) {
+        const btn = document.getElementById("sendBtn");
+        btn.disabled = !enabled;
+      }
+
+      // ── HELPER: getCurrentTime() ──────────────
+      // Current time return karo "HH:MM" format mein
+      function getCurrentTime() {
+        return new Date().toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
+      }
+
+      // ── HELPER: escapeHtml() ─────────────────
+      // Security ke liye — user input ko safe banao
+      // XSS attack se bachata hai (malicious HTML inject hone se rokta hai)
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.appendChild(document.createTextNode(text));
+        return div.innerHTML;
+      }
+    </script>
+  </body>
+</html>

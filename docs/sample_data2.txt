@@ -1,0 +1,11 @@
+RAG stands for Retrieval Augmented Generation, an AI technique.
+In RAG, AI finds answers from external documents instead of training data.
+The three main steps of RAG are Retrieve, Augment and Generate.
+
+Vector Database stores text as numbers called vectors.
+ChromaDB, Pinecone and FAISS are popular vector databases.
+LangChain is a Python framework for building AI applications.
+
+Embedding model converts text into numerical representation.
+all-MiniLM-L6-v2 is a popular free embedding model from HuggingFace.
+OpenAI GPT-4 and Anthropic Claude are popular LLM models.

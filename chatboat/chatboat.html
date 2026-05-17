@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RAG System — Abhishek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09090b;--surface:#111113;--surface2:#18181b;--surface3:#1f1f23;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.1);
+  --accent:#00e5a0;--text:#e4e4e7;--text2:#71717a;--text3:#3f3f46;
+  --user-bg:#0f2d24;--user-border:rgba(0,229,160,0.2);
+  --mono:'DM Mono',monospace;--sans:'Sora',sans-serif;
+}
+html,body{height:100%;overflow-x:hidden}
+body{font-family:var(--sans);background:var(--bg);color:var(--text)}
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,0.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.018) 1px,transparent 1px);
+  background-size:52px 52px;pointer-events:none;z-index:0;
+}
+
+/* NAV */
+nav{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;padding:22px 48px;border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text);letter-spacing:-0.3px}
+.nav-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);animation:glow 2s infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 6px var(--accent)}50%{box-shadow:0 0 18px var(--accent)}}
+.nav-badge{font-family:var(--mono);font-size:10px;color:var(--accent);background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.2);padding:5px 14px;border-radius:20px}
+
+/* HERO */
+.hero{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:100px 24px 60px}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:700px;height:420px;background:radial-gradient(ellipse,rgba(0,229,160,0.09) 0%,transparent 70%);pointer-events:none}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--accent);background:rgba(0,229,160,0.06);border:1px solid rgba(0,229,160,0.18);padding:6px 16px;border-radius:20px;margin-bottom:32px;letter-spacing:0.5px}
+.hero-tag span{width:5px;height:5px;border-radius:50%;background:var(--accent)}
+h1{font-size:clamp(42px,6vw,78px);font-weight:700;line-height:1.1;letter-spacing:-2px;margin-bottom:10px}
+.gt{background:linear-gradient(135deg,#00e5a0 0%,#00b37d 40%,#fff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(14px,2vw,17px);color:var(--text2);font-weight:300;margin-top:16px;margin-bottom:8px}
+.hero-by{font-family:var(--mono);font-size:12px;color:var(--text3);margin-bottom:48px;letter-spacing:0.3px}
+.hero-by strong{color:var(--accent);font-weight:500}
+.cta{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:#000;font-family:var(--sans);font-size:14px;font-weight:600;padding:14px 28px;border-radius:12px;border:none;cursor:pointer;transition:all 0.2s;box-shadow:0 0 32px rgba(0,229,160,0.3)}
+.cta:hover{background:#1af5b0;box-shadow:0 0 48px rgba(0,229,160,0.5);transform:translateY(-2px)}
+
+/* PIPELINE BANNER */
+.banner{position:relative;z-index:1;margin:56px auto 0;max-width:840px;width:calc(100% - 48px);background:var(--surface);border:1px solid var(--border2);border-radius:20px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,0.5)}
+.b-bar{display:flex;align-items:center;gap:7px;padding:14px 20px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.b-dot{width:10px;height:10px;border-radius:50%}
+.b-url{font-family:var(--mono);font-size:11px;color:var(--text3);margin-left:8px}
+.pipeline{padding:44px 32px;display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;row-gap:16px}
+.ps{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.pi{width:54px;height:54px;border-radius:14px;background:var(--surface3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:20px;transition:all 0.3s}
+.ps:hover .pi{border-color:rgba(0,229,160,0.4);box-shadow:0 0 20px rgba(0,229,160,0.1)}
+.ps.ac .pi{background:rgba(0,229,160,0.08);border-color:rgba(0,229,160,0.3)}
+.pl{font-family:var(--mono);font-size:10px;color:var(--text2);white-space:nowrap}
+.ps.ac .pl{color:var(--accent)}
+.pa{color:var(--text3);font-size:16px;margin:0 6px;margin-top:-18px}
+
+/* STATS */
+.stats{position:relative;z-index:1;display:flex;justify-content:center;margin:56px auto;max-width:580px;border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.stat{flex:1;padding:28px 20px;text-align:center;border-right:1px solid var(--border)}
+.stat:last-child{border-right:none}
+.sn{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--accent);display:block}
+.sl{font-size:11px;color:var(--text2);margin-top:5px}
+
+/* STACK */
+.stack{position:relative;z-index:1;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:0 24px 72px}
+.stag{font-family:var(--mono);font-size:11px;color:var(--text2);background:var(--surface);border:1px solid var(--border2);padding:6px 14px;border-radius:20px;transition:all 0.2s}
+.stag:hover{color:var(--accent);border-color:rgba(0,229,160,0.3)}
+
+/* FOOTER */
+footer{position:relative;z-index:1;text-align:center;padding:24px;border-top:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--text3)}
+footer strong{color:var(--accent);font-weight:500}
+
+/* ══ CHAT WIDGET ══ */
+.bubble-btn{
+  position:fixed;bottom:28px;right:28px;width:58px;height:58px;border-radius:50%;
+  background:var(--accent);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 32px rgba(0,229,160,0.45);z-index:1000;
+  transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);color:#000;
+}
+.bubble-btn:hover{transform:scale(1.1);box-shadow:0 12px 44px rgba(0,229,160,0.6)}
+.bubble-btn.open{background:#1a1a1e;transform:scale(0.9)}
+.bubble-btn .i-open{display:flex}
+.bubble-btn.open .i-open{display:none}
+.bubble-btn .i-close{display:none}
+.bubble-btn.open .i-close{display:flex}
+.notif{position:absolute;top:2px;right:2px;width:14px;height:14px;background:#ff4d6d;border:2px solid var(--bg);border-radius:50%;font-size:8px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+
+.chat-win{
+  position:fixed;bottom:100px;right:28px;width:370px;height:510px;
+  background:var(--surface);border:1px solid var(--border2);border-radius:20px;
+  display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 24px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(0,229,160,0.05);
+  z-index:999;
+  transform:scale(0.85) translateY(20px);opacity:0;pointer-events:none;
+  transform-origin:bottom right;
+  transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.chat-win.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all}
+
+/* header */
+.cw-head{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;background:var(--surface2);border-bottom:1px solid var(--border);flex-shrink:0}
+.cw-left{display:flex;align-items:center;gap:10px}
+.cw-av{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#00e5a0,#00875f);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:500;color:#000;box-shadow:0 0 14px rgba(0,229,160,0.3)}
+.cw-name{font-family:var(--mono);font-size:13px;font-weight:500}
+.cw-status{font-size:10px;color:var(--accent);display:flex;align-items:center;gap:5px;margin-top:2px}
+.cw-sdot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent)}
+.cw-x{cursor:pointer;color:var(--text2);background:none;border:none;display:flex;align-items:center;padding:4px}
+
+/* messages */
+.cw-msgs{flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+.cw-msgs::-webkit-scrollbar{width:3px}
+.cw-msgs::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+.msg{display:flex;gap:8px;align-items:flex-start;animation:pop 0.28s cubic-bezier(0.34,1.56,0.64,1) forwards;opacity:0}
+@keyframes pop{from{opacity:0;transform:scale(0.92) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.msg.user{flex-direction:row-reverse;align-self:flex-end;max-width:83%}
+.msg.bot{align-self:flex-start;max-width:90%}
+.av{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;font-weight:500;flex-shrink:0}
+.msg.bot .av{background:var(--surface3);border:1px solid var(--border2);color:var(--accent)}
+.msg.user .av{background:var(--user-bg);border:1px solid var(--user-border);color:var(--accent)}
+.bbl{padding:10px 13px;border-radius:13px;font-size:13px;line-height:1.65;font-weight:300}
+.msg.bot .bbl{background:var(--surface2);border:1px solid var(--border);border-top-left-radius:3px;color:var(--text)}
+.msg.user .bbl{background:var(--user-bg);border:1px solid var(--user-border);border-top-right-radius:3px;color:#a7f3d0}
+.ts{display:block;font-size:9px;color:var(--text3);margin-top:5px;font-family:var(--mono)}
+
+/* typing */
+.typing{display:none;align-items:flex-start;gap:8px;padding:0 12px 6px}
+.typing .av{background:var(--surface3);border:1px solid var(--border2);color:var(--accent)}
+.dots{display:flex;gap:4px;align-items:center;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:13px;border-top-left-radius:3px}
+.dots span{width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:0.3;animation:bob 1.1s infinite ease-in-out}
+.dots span:nth-child(2){animation-delay:0.18s}
+.dots span:nth-child(3){animation-delay:0.36s}
+@keyframes bob{0%,100%{opacity:0.2;transform:scale(0.75) translateY(0)}50%{opacity:1;transform:scale(1) translateY(-3px)}}
+
+/* input */
+.cw-foot{padding:10px 12px 14px;border-top:1px solid var(--border);flex-shrink:0}
+.inp-row{display:flex;align-items:flex-end;gap:8px;background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:3px 3px 3px 14px;transition:border-color 0.2s,box-shadow 0.2s}
+.inp-row:focus-within{border-color:rgba(0,229,160,0.35);box-shadow:0 0 0 3px rgba(0,229,160,0.06)}
+textarea{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:13px;font-weight:300;line-height:1.5;padding:9px 0;resize:none;max-height:100px;overflow-y:auto}
+textarea::placeholder{color:var(--text3)}
+textarea::-webkit-scrollbar{width:0}
+.send{width:36px;height:36px;border-radius:9px;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#000;flex-shrink:0;transition:all 0.15s;box-shadow:0 0 12px rgba(0,229,160,0.25)}
+.send:hover:not(:disabled){background:#1af5b0;box-shadow:0 0 20px rgba(0,229,160,0.45);transform:scale(1.06)}
+.send:active:not(:disabled){transform:scale(0.95)}
+.send:disabled{background:var(--surface3);color:var(--text3);cursor:not-allowed;box-shadow:none}
+
+@media(max-width:480px){
+  .chat-win{width:calc(100vw - 20px);right:10px;bottom:88px}
+  nav{padding:16px 20px}
+  .pipeline{padding:32px 16px}
+  .stats{flex-direction:column}
+  .stat{border-right:none;border-bottom:1px solid var(--border)}
+  .stat:last-child{border-bottom:none}
+}
+</style>
+</head>
+<body>
+
+<!-- LANDING PAGE -->
+<nav>
+  <div class="nav-logo"><div class="nav-dot"></div>RAG / System</div>
+  <span class="nav-badge">v1.0 · Local Build</span>
+</nav>
+
+<section class="hero">
+  <div class="hero-tag"><span></span>Retrieval Augmented Generation</div>
+  <h1><span class="gt">RAG System</span><br/><span style="color:var(--text);font-weight:300;font-size:0.6em;letter-spacing:-1px">built from scratch</span></h1>
+  <p class="hero-sub">Ask questions. Get answers from your own documents.</p>
+  <p class="hero-by">Created by <strong>Abhishek</strong> &nbsp;·&nbsp; ChromaDB + Claude API + Python</p>
+  <button class="cta" onclick="toggleChat()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+    Try the Assistant
+  </button>
+</section>
+
+<div class="banner">
+  <div class="b-bar">
+    <div class="b-dot" style="background:#ff5f57"></div>
+    <div class="b-dot" style="background:#febc2e"></div>
+    <div class="b-dot" style="background:#28c840"></div>
+    <span class="b-url">RAG Pipeline · end-to-end flow</span>
+  </div>
+  <div class="pipeline">
+    <div class="ps"><div class="pi">📄</div><div class="pl">Documents</div></div>
+    <div class="pa">→</div>
+    <div class="ps"><div class="pi">✂️</div><div class="pl">Chunking</div></div>
+    <div class="pa">→</div>
+    <div class="ps ac"><div class="pi">🔢</div><div class="pl">Embeddings</div></div>
+    <div class="pa">→</div>
+    <div class="ps ac"><div class="pi">🗄️</div><div class="pl">ChromaDB</div></div>
+    <div class="pa">→</div>
+    <div class="ps"><div class="pi">🔍</div><div class="pl">Retrieval</div></div>
+    <div class="pa">→</div>
+    <div class="ps ac"><div class="pi">🤖</div><div class="pl">Claude API</div></div>
+    <div class="pa">→</div>
+    <div class="ps"><div class="pi">💬</div><div class="pl">Answer</div></div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><span class="sn" id="chunkCount">—</span><div class="sl">Chunks in DB</div></div>
+  <div class="stat"><span class="sn">MiniLM</span><div class="sl">Embedding Model</div></div>
+  <div class="stat"><span class="sn">Haiku 4.5</span><div class="sl">Claude Model</div></div>
+</div>
+
+<div class="stack">
+  <span class="stag">Python 3.x</span><span class="stag">FastAPI</span><span class="stag">ChromaDB</span>
+  <span class="stag">LangChain</span><span class="stag">HuggingFace</span><span class="stag">Claude API</span>
+  <span class="stag">Vanilla JS</span><span class="stag">HTML + CSS</span>
+</div>
+
+<footer>Built by <strong>Abhishek</strong> &nbsp;·&nbsp; RAG System Demo &nbsp;·&nbsp; 2026</footer>
+
+
+<!-- CHAT WIDGET BUTTON -->
+<button class="bubble-btn" id="bubbleBtn" onclick="toggleChat()">
+  <div class="notif" id="notif">1</div>
+  <span class="i-open">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+  </span>
+  <span class="i-close">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+  </span>
+</button>
+
+<!-- CHAT WINDOW -->
+<div class="chat-win" id="chatWin">
+  <div class="cw-head">
+    <div class="cw-left">
+      <div class="cw-av">AI</div>
+      <div>
+        <div class="cw-name">RAG Assistant</div>
+        <div class="cw-status"><span class="cw-sdot"></span>Online · ChromaDB connected</div>
+      </div>
+    </div>
+    <button class="cw-x" onclick="toggleChat()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+  </div>
+
+  <div class="cw-msgs" id="cwMsgs">
+    <div class="msg bot">
+      <div class="av">AI</div>
+      <div class="bbl">Hello! I'm your RAG Assistant. Ask me anything about your documents — I'll search through the knowledge base and give you accurate answers.<span class="ts" id="wts"></span></div>
+    </div>
+  </div>
+
+  <div class="typing" id="typingEl">
+    <div class="av">AI</div>
+    <div class="dots"><span></span><span></span><span></span></div>
+  </div>
+
+  <div class="cw-foot">
+    <div class="inp-row">
+      <textarea id="cwInput" placeholder="Ask a question..." rows="1"></textarea>
+      <button class="send" id="sendBtn" onclick="sendMsg()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:8000/chat';
+document.getElementById('wts').textContent = getTime();
+
+fetch('http://localhost:8000/')
+  .then(r=>r.json())
+  .then(d=>{ if(d.chunks_in_db!=null) document.getElementById('chunkCount').textContent=d.chunks_in_db; })
+  .catch(()=>{});
+
+let open=false;
+function toggleChat(){
+  open=!open;
+  document.getElementById('chatWin').classList.toggle('open',open);
+  document.getElementById('bubbleBtn').classList.toggle('open',open);
+  if(open){ document.getElementById('notif').style.display='none'; document.getElementById('cwInput').focus(); }
+}
+
+const inp=document.getElementById('cwInput');
+inp.addEventListener('input',function(){this.style.height='auto';this.style.height=this.scrollHeight+'px'});
+inp.addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()} });
+
+async function sendMsg(){
+  const q=inp.value.trim(); if(!q) return;
+  inp.value=''; inp.style.height='auto';
+  setBtn(false); addMsg('user',q); showTyping(true);
+  try{
+    const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q})});
+    const d=await r.json();
+    showTyping(false); addMsg('bot',d.answer||'No response received.');
+  }catch(e){
+    showTyping(false); addMsg('bot','⚠️ Unable to connect to the backend. Please make sure the Python server is running.');
+  }
+  setBtn(true); inp.focus();
+}
+
+function addMsg(role,text){
+  const w=document.getElementById('cwMsgs');
+  const d=document.createElement('div');
+  d.className='msg '+role;
+  d.innerHTML=`<div class="av">${role==='user'?'U':'AI'}</div><div class="bbl">${esc(text)}<span class="ts">${getTime()}</span></div>`;
+  w.appendChild(d); w.scrollTop=w.scrollHeight;
+}
+function showTyping(s){ const t=document.getElementById('typingEl'); t.style.display=s?'flex':'none'; if(s) document.getElementById('cwMsgs').scrollTop=9999; }
+function setBtn(on){ document.getElementById('sendBtn').disabled=!on; }
+function getTime(){ return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}); }
+function esc(t){ const d=document.createElement('div'); d.appendChild(document.createTextNode(t)); return d.innerHTML; }
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+# RAG Chatbot — Python Dependencies
+# Install: pip install -r requirements.txt
+
+# ── Vector DB pipeline (rag_vector_db.py) ──
+langchain                  # core LangChain framework
+langchain-community        # community integrations (TextLoader, etc.)
+langchain-text-splitters   # document chunking utilities
+langchain-huggingface      # HuggingFace embeddings integration
+langchain-chroma           # ChromaDB integration
+chromadb                   # local vector database
+sentence-transformers      # embedding model library (all-MiniLM-L6-v2)
+
+# ── Backend / API (app.py) ──
+fastapi                    # web framework for /chat endpoint
+uvicorn                    # ASGI server that runs FastAPI
+anthropic                  # official Anthropic Python SDK
+python-dotenv              # loads .env (ANTHROPIC_API_KEY)
+pydantic                   # request/response validation (auto with FastAPI)
+
+# ── RAGAS Evaluation (evaluate.py) ──
+ragas                      # RAG evaluation framework (Faithfulness, etc.)
+langchain-anthropic        # wraps Claude as judge LLM for RAGAS
+datasets                   # HuggingFace Datasets — RAGAS input format
+pandas                     # results DataFrame handling & display
