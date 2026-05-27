@@ -49,13 +49,15 @@ echo "📥 Step 4: Installing backend & API packages..."
 pip install fastapi \
             uvicorn \
             anthropic \
-            python-dotenv
+            python-dotenv \
+            requests
 echo "✅ Backend packages installed!"
 
 #fastapi       - Web framework, handles incoming HTTP requests (receives POST /chat request from frontend)
 #uvicorn       - Server that runs FastAPI (listens on localhost:8000)
 #anthropic     - Official Anthropic Python SDK (connects and talks to Claude API)
 #python-dotenv - Reads the .env file (loads ANTHROPIC_API_KEY into the app)
+#requests      - HTTP client library — used by evaluate.py to call the /chat endpoint
 
 # STEP 5 — Install RAGAS Evaluation Packages
 # (Required for evaluate.py — measures RAG quality with metrics like Faithfulness)
@@ -87,7 +89,7 @@ echo "✅ RAGAS evaluation packages installed!"
 # pip install beautifulsoup4 requests
 
 # Progress bars for long evaluation runs (Part 3+)
-# pip install tqdm
+pip install tqdm
 
 # ------------------------------------------------
 

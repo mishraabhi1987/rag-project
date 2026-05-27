@@ -75,10 +75,10 @@ EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 # Adding/removing a metric here automatically flows through the
 # entire pipeline — no other code changes needed.
 METRICS = [
-    faithfulness,
-    answer_relevancy,
     context_precision,
     context_recall,
+    faithfulness,
+    answer_relevancy
 ]
 
 # Score interpretation tiers. Used for emoji-based visual indicators
@@ -89,14 +89,31 @@ THRESHOLDS = {
     "poor": 0.50,
 }
 
-# Plain-English meaning of each metric — embedded in the JSON output
-# so anyone reading the results file understands what each score means
-# without referring back to RAGAS documentation.
+# Meaning of each metric — embedded in the JSON output
+# so anyone reading the results file understands what each score means without referring back to RAGAS documentation.
 METRIC_MEANINGS = {
-    "faithfulness": "Is the answer grounded in retrieved context? (Higher = less hallucination)",
-    "answer_relevancy": "Does the answer actually address the question? (Higher = on-topic)",
-    "context_precision": "Are relevant chunks ranked higher in retrieval? (Higher = better ranking)",
-    "context_recall": "Did retrieval capture all info needed for ground truth? (Higher = complete)",
+    # RETRIEVAL STAGE METRICS
+    "context_precision": {
+        "what": "Are the most relevant chunks ranked at the top?",
+        "higher_is": "Better retrieval ranking",
+        "if_low_fix": "Reranker, embedding model, or chunk size",
+    },
+    "context_recall": {
+        "what": "Did retrieval capture all info needed for the answer?",
+        "higher_is": "More complete retrieval",
+        "if_low_fix": "Chunking strategy, top-k, or index quality",
+    },
+    # GENERATION STAGE METRICS
+    "faithfulness": {
+        "what": "Is the answer supported by the retrieved context?",
+        "higher_is": "Less hallucination",
+        "if_low_fix": "LLM or generation prompt (not retrieval)",
+    },
+    "answer_relevancy": {
+        "what": "Does the answer actually address the question?",
+        "higher_is": "More on-topic, less drift",
+        "if_low_fix": "Answer-generation prompt",
+    }
 }
 
 # Fail fast if API key is missing — better than crashing mid-evaluation
@@ -125,7 +142,7 @@ def query_rag(question: str) -> dict:
     """Send a single question to the RAG pipeline's /chat endpoint. Returns the JSON response containing:
         - answer    : the LLM-generated answer
         - contexts  : the retrieved chunks used to ground the answer
-        
+
     Raises RuntimeError on any non-200 response so that evaluation fails loudly instead of producing misleading partial results."""
 
     response = requests.post(
