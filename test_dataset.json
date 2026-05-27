@@ -1,22 +1,52 @@
 [
   {
-    "question": "What is Abhishek's current professional role and his specific technical stack?",
-    "ground_truth": "Abhishek is a frontend developer with 15 years of experience. He works at Coforge and is an expert in JavaScript, React, and Vue.js. His core skills also include HTML, CSS, Node.js, and version control."
+    "category": "multi_hop",
+    "question": "What are the three main steps of RAG, and which tools or technologies does the knowledge base mention for building RAG systems?",
+    "ground_truth": "The three main steps of RAG are Retrieve, Augment, and Generate. The knowledge base mentions vector databases like ChromaDB, Pinecone, and FAISS for storing text as vectors, LangChain as a Python framework for building AI applications, and embedding models such as all-MiniLM-L6-v2 from HuggingFace for converting text into numerical representations."
   },
   {
-    "question": "Where is Giyas located and what is his professional background?",
-    "ground_truth": "Giyas lives in Delhi and works at Coforge. He has a total of 20 years of experience."
+    "category": "multi_hop",
+    "question": "What does Abhishek do professionally on weekdays, and what does he do on Sundays?",
+    "ground_truth": "On weekdays Abhishek works as a frontend developer at Coforge, with expertise in JavaScript, React, and Vue.js. On Sundays from 11am to 12:30pm, he reviews IFM (IntelliFrame Media) work, which is his personal music and content project focused on music production and content creation."
   },
   {
-    "question": "What is IntelliFrame Media (IFM) and how is it managed?",
-    "ground_truth": "IFM is Abhishek's personal music and content project focused on music production and content creation. He reviews IFM work every Sunday from 11:00 AM to 12:30 PM."
+    "category": "negation_absence",
+    "question": "Does Abhishek work on Java backend development?",
+    "ground_truth": "No, Abhishek does not work on Java backend development. According to the knowledge base, he is a frontend developer at Coforge whose skills include JavaScript, React, Vue.js, HTML, CSS, Node.js, and version control. Java is not mentioned in his skill set."
   },
   {
-    "question": "What does RAG stand for and what are its three main steps?",
-    "ground_truth": "RAG stands for Retrieval Augmented Generation. The three main steps are Retrieve, Augment, and Generate."
+    "category": "negation_absence",
+    "question": "Is LangChain a type of vector database?",
+    "ground_truth": "No, LangChain is not a vector database. According to the knowledge base, LangChain is a Python framework for building AI applications. The vector databases mentioned are ChromaDB, Pinecone, and FAISS."
   },
   {
-    "question": "What is the role of an embedding model and name some popular vector databases?",
-    "ground_truth": "An embedding model converts text into numerical representations called vectors. Popular vector databases include ChromaDB, Pinecone, and FAISS."
+    "category": "comparative",
+    "question": "What is the difference between Abhishek and Giyas in terms of their professional roles and experience?",
+    "ground_truth": "Both Abhishek and Giyas work at Coforge. Abhishek is a frontend developer with 15 years of experience, skilled in JavaScript, React, and Vue.js. Giyas lives in Delhi and has 20 years of experience. The knowledge base does not specify Giyas's specific role."
+  },
+  {
+    "category": "comparative",
+    "question": "What is the difference between ChromaDB and LangChain in the context of AI applications?",
+    "ground_truth": "ChromaDB is a vector database used to store text as numerical vectors, alongside Pinecone and FAISS. LangChain is a Python framework used for building AI applications. They serve different purposes: ChromaDB handles data storage and retrieval, while LangChain provides the framework to build and orchestrate AI applications."
+  },
+  {
+    "category": "out_of_scope",
+    "question": "What is the current population of India?",
+    "ground_truth": "I don't have enough information in the knowledge base to answer this."
+  },
+  {
+    "category": "out_of_scope",
+    "question": "What was the highest-grossing Bollywood movie of 2025?",
+    "ground_truth": "I don't have enough information in the knowledge base to answer this."
+  },
+  {
+    "category": "numerical_specific",
+    "question": "How many years of total experience does Abhishek have?",
+    "ground_truth": "Abhishek has 15 years of experience as a frontend developer."
+  },
+  {
+    "category": "numerical_specific",
+    "question": "When does Abhishek review IFM work each week, and at what time?",
+    "ground_truth": "Abhishek reviews IFM work every Sunday from 11am to 12:30pm."
   }
 ]

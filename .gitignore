@@ -19,3 +19,6 @@ chroma_db/
 # ── IDE ──
 .vscode/
 .idea/
+
+# ── Evaluation Results ──
+eval_results/
