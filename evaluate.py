@@ -53,6 +53,7 @@ from ragas.llms import LangchainLLMWrapper
 from ragas.embeddings import LangchainEmbeddingsWrapper
 from langchain_anthropic import ChatAnthropic
 from langchain_huggingface import HuggingFaceEmbeddings
+from langfuse import observe, get_client
 
 # Load environment variables (ANTHROPIC_API_KEY) from .env file
 load_dotenv()
@@ -341,7 +342,14 @@ def print_aggregate_summary(summary: dict):
         # :22s pads the metric name to 22 chars for vertical alignment
         print(f"   {emoji} {metric_name:22s} : {score_str}")
     print("=" * 60)
-
+    # Stage 5.5: Log evaluation scores to Langfuse
+    langfuse = get_client()
+    for metric_name, score in summary["overall"].items():
+        if score is not None:
+            langfuse.score_current_trace(
+                name=metric_name,
+                value=score,
+            )
 
 def save_results(summary: dict) -> Path:
     """ Persist the full evaluation results to a timestamped JSON file in eval_results/.
@@ -391,7 +399,7 @@ def save_results(summary: dict) -> Path:
 # ================================================================
 # Entry Point
 # ================================================================
-
+@observe(name="ragas-evaluation-run")
 def main():
     """ Orchestrate the full RAGAS evaluation pipeline end-to-end.
     Pipeline stages:
@@ -428,3 +436,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    langfuse = get_client()
+    langfuse.flush()

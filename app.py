@@ -17,9 +17,9 @@ import anthropic
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from dotenv import load_dotenv
+from langfuse import observe, get_client
 
 load_dotenv()
-
 
 # ----------------------------------------------------------------
 # Configuration
@@ -101,6 +101,7 @@ class ChatResponse(BaseModel):
 # ----------------------------------------------------------------
 
 @app.post("/chat", response_model=ChatResponse)
+@observe(name="rag-chat-endpoint")   
 async def chat(req: ChatRequest):
     """
     RAG flow: retrieve relevant chunks from ChromaDB, then generate
@@ -167,14 +168,34 @@ Please answer based on the context above."""
     print("🤖 Calling Claude API...")
 
     try:
-        response = claude.messages.create(
+        langfuse = get_client()
+        with langfuse.start_as_current_observation(
+            as_type="generation",
+            name="claude-rag-generation",
             model=CLAUDE_MODEL,
-            max_tokens=MAX_TOKENS,
-            temperature=TEMPERATURE,
-            system=system_prompt,
-            messages=[{"role": "user", "content": user_prompt}],
-        )
-        answer = response.content[0].text
+            input={"question": req.question, "context_chunks": len(docs)},
+        ) as generation:
+            response = claude.messages.create(
+                model=CLAUDE_MODEL,
+                max_tokens=MAX_TOKENS,
+                temperature=TEMPERATURE,
+                system=system_prompt,
+                messages=[{"role": "user", "content": user_prompt}],
+            )
+            answer = response.content[0].text
+            generation.update(
+                output=answer,
+                usage_details={
+                    "input": response.usage.input_tokens,
+                    "output": response.usage.output_tokens,
+                },
+                metadata={
+                    "sources": sources,
+                    "top_k": TOP_K,
+                    "temperature": TEMPERATURE,
+                },
+            )
+        
         print(f"✅ Claude responded ({response.usage.output_tokens} tokens used)")
 
     except anthropic.AuthenticationError:
