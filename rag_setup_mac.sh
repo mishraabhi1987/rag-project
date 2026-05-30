@@ -91,6 +91,9 @@ echo "✅ RAGAS evaluation packages installed!"
 # Progress bars for long evaluation runs (Part 3+)
 pip install tqdm
 
+# Install langfuse for RAG pipeline observability and evaluation logging
+pip install langfuse
+
 # ------------------------------------------------
 
 echo ""
